@@ -1,16 +1,12 @@
 import Koa from 'koa';
+import { responseTime } from './lib/response-time';
+import routes from './routes';
+import parser from 'koa-bodyparser';
 
 const app = new Koa();
-
-const responseTime = (header = 'K-ResponseTime') =>
-  async (ctx, next) => {
-    const start = Date.now();
-    await next();
-    const end = Date.now();
-    ctx.set(header, end - start);
-  };
-
 app.use(responseTime());
+app.use(parser());
+app.use(routes());
 
 app.use(async (ctx) => {
   ctx.body = 'Hello';
