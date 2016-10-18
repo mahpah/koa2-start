@@ -1,0 +1,33 @@
+{
+  "name": "koa2-start",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --compilers js:babel-core/register --watch --recursive test",
+    "test:single": "mocha --compilers js:babel-core/register --recursive test",
+    "start": "nodemon -e js,jade -x \"npm run serve\"",
+    "serve": "babel-node ."
+  },
+  "keywords": [],
+  "author": "Ha Pham <mahpahh@gmail.com> (http://mahpahh.com)",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-cli": "^6.16.0",
+    "babel-core": "^6.17.0",
+    "babel-eslint": "^7.0.0",
+    "babel-preset-es2015": "^6.16.0",
+    "babel-preset-stage-3": "^6.17.0",
+    "chai": "^3.5.0",
+    "mocha": "^3.1.2",
+    "nodemon": "^1.11.0",
+    "supertest": "^2.0.0"
+  },
+  "dependencies": {
+    "babel-polyfill": "^6.16.0",
+    "babel-register": "^6.16.3",
+    "koa": "^2.0.0",
+    "koa-router": "^7.0.1",
+    "rethinkdbdash": "^2.3.23"
+  }
+}
