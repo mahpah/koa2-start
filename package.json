@@ -7,7 +7,8 @@
     "test": "mocha --compilers js:babel-core/register --watch --recursive test",
     "test:single": "mocha --compilers js:babel-core/register --recursive test",
     "start": "nodemon -e js,jade -x \"npm run serve\"",
-    "serve": "babel-node ."
+    "serve": "babel-node .",
+    "migrate": "babel-node migrations"
   },
   "keywords": [],
   "author": "Ha Pham <mahpahh@gmail.com> (http://mahpahh.com)",
@@ -26,6 +27,7 @@
   "dependencies": {
     "babel-polyfill": "^6.16.0",
     "babel-register": "^6.16.3",
+    "bcrypt-as-promised": "^1.1.0",
     "koa": "^2.0.0",
     "koa-router": "^7.0.1",
     "rethinkdbdash": "^2.3.23"
