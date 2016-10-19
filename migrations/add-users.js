@@ -1,5 +1,5 @@
 'use strict';
-const TableName = 'users';
+const TableName = 'accounts';
 import r from '../app/lib/rethink';
 
 export function up(next) {

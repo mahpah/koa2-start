@@ -1,9 +1,9 @@
 import 'babel-polyfill';
 import { expect } from 'chai';
-import { User, TableName } from '../../app/models/user';
+import { Account, TableName } from '../../app/models/account';
 import r from '../../app/lib/rethink';
 
-describe('User model', () => {
+describe('Account model', () => {
   after(async () => {
     try {
       await r.table(TableName)
@@ -22,19 +22,19 @@ describe('User model', () => {
   });
 
   it('should create user', async () => {
-    let user = new User();
+    let user = new Account();
     expect(typeof user).to.equal('object');
   });
 
   it('should store user data', async () => {
-    let user = new User({ name: 'john' });
+    let user = new Account({ name: 'john' });
     expect(user.name).to.equal('john');
   });
 
   it('should create user id', async () => {
     let username = 'john';
     let password = 'secret';
-    let user = new User({
+    let user = new Account({
       username,
       password,
     });
@@ -45,13 +45,13 @@ describe('User model', () => {
   it('should find user by username', async () => {
     let username = 'john';
     let password = 'secret';
-    let user = new User({ username, password });
+    let user = new Account({ username, password });
     await user.save();
 
-    let userFound = await User.findByUsername(username);
+    let userFound = await Account.findByUsername(username);
     expect(userFound.username).to.equal(username);
 
-    let doe = await User.findByUsername('doe');
+    let doe = await Account.findByUsername('doe');
     expect(doe).not.to.exist;
   });
 
@@ -61,17 +61,17 @@ describe('User model', () => {
     let password = 'secret';
     let john;
     let kristin;
-    let user = new User({ username: johnName, password });
+    let user = new Account({ username: johnName, password });
     await user.save();
 
-    john = await User.findByUsername(johnName);
+    john = await Account.findByUsername(johnName);
     expect(john).to.exist;
 
     user.username = kristinName;
     await user.save();
 
-    john = await User.findByUsername(johnName);
-    kristin = await User.findByUsername(kristinName);
+    john = await Account.findByUsername(johnName);
+    kristin = await Account.findByUsername(kristinName);
     expect(john).not.to.exist;
     expect(kristin).to.exist;
   });
@@ -79,7 +79,7 @@ describe('User model', () => {
   it('should create user password hash when save', async () => {
     let username = 'john';
     let password = 'secret';
-    let user = new User({ username, password });
+    let user = new Account({ username, password });
     await user.save();
     expect(user.password).not.to.equal(password);
   });
@@ -87,7 +87,7 @@ describe('User model', () => {
   it('should validate correct password', async () => {
     let username = 'john';
     let password = 'secret';
-    let user = new User({ username, password });
+    let user = new Account({ username, password });
     await user.save();
 
     expect(await user.isPassword(password)).to.be.true;
@@ -96,7 +96,7 @@ describe('User model', () => {
   it('should not validate incorrect password', async () => {
     let username = 'john';
     let password = 'secret';
-    let user = new User({ username, password });
+    let user = new Account({ username, password });
     await user.save();
 
     expect(await user.isPassword('password000')).to.be.false;
@@ -105,22 +105,22 @@ describe('User model', () => {
   it('shoud get user by id', async () => {
     let username = 'john';
     let password = 'secret';
-    let user = new User({ username, password });
+    let user = new Account({ username, password });
     await user.save();
 
-    let john = await User.get(user.id);
-    expect(john instanceof User).to.be.true;
+    let john = await Account.get(user.id);
+    expect(john instanceof Account).to.be.true;
     expect(john.username).to.eql(user.username);
   });
 
   it('shoud remove user', async () => {
     let username = 'john';
     let password = 'secret';
-    let user = new User({ username, password });
+    let user = new Account({ username, password });
     await user.save();
 
-    let result = await User.remove(user.id);
+    let result = await Account.remove(user.id);
     expect(result).to.be.true;
-    expect(await User.get(user.id)).not.to.exist;
+    expect(await Account.get(user.id)).not.to.exist;
   });
 });

@@ -1,13 +1,13 @@
 import jwt from 'jsonwebtoken';
 import { TokenKey } from '../../config/key';
-import { User } from '../../models/user.js';
+import { Account } from '../../models/account.js';
 
-const validate = async (username, password) => {
+const validateAccount = async (username, password) => {
   if (!username || !password) {
     return false;
   }
 
-  let user = await User.findByUsername(username);
+  let user = await Account.findByUsername(username);
   if (!user) {
     return false;
   }
@@ -16,22 +16,79 @@ const validate = async (username, password) => {
   return isUserValid ? user : false;
 };
 
+const extractTokenFromHeader = async (ctx, next) => {
+  let authorization = ctx.get('authorization');
+  if (!authorization.match(/^Bearer\s/)) {
+    ctx.status = 401;
+    return;
+  }
+  let token = authorization.slice(7);
+  ctx.state.token = token;
+  await next();
+};
+
+const extractTokenFromQuery = async (ctx, next) => {
+  let { access_token: token } = ctx.query;
+  ctx.state.token = token;
+  await next();
+};
+
+const validateToken = async (ctx, next) => {
+  let { token } = ctx.state;
+  try {
+    let payload = jwt.verify(token, TokenKey);
+    let { id: userId } = payload;
+    let { id, username } = await Account.get(userId);
+    ctx.state.account = {
+      id,
+      username,
+    };
+
+    await next();
+  } catch (e) {
+    ctx.status = 401;
+    if (e instanceof jwt.JsonWebTokenError) {
+      ctx.body = {
+        message: 'Invalid token',
+      };
+      return;
+    }
+
+    if (e instanceof jwt.TokenExpiredError) {
+      ctx.body = {
+        message: 'Token expired',
+      };
+      return;
+    }
+
+    ctx.body = e;
+    return;
+  }
+};
+
+const generateToken = (account) => {
+  let claim = {
+    id: account.id,
+    username: account.username,
+  };
+
+  let body = {
+    access_token: jwt.sign(claim, TokenKey, {
+      expiresIn: 60 * 60,
+    }),
+    username: account.username,
+    id: account.id,
+  };
+  return body;
+};
+
 export const authenticate = (route) => {
   route.all('/authenticate', async (ctx) => {
     let { username, password } = ctx.request.body;
-    let claim;
-    let user = await validate(username, password);
+    let user = await validateAccount(username, password);
 
     if (user) {
-      claim = {
-        id: user.id,
-        username: user.username,
-      };
-      ctx.body = {
-        access_token: jwt.sign(claim, TokenKey),
-        username: user.username,
-        id: user.id,
-      };
+      ctx.body = generateToken(user);
       return;
     }
 
@@ -42,41 +99,23 @@ export const authenticate = (route) => {
     return;
   });
 
-  route.get('/me', async (ctx) => {
-    let authorization = ctx.get('authorization');
-    if (!authorization.match(/^Bearer\s/)) {
-      ctx.status = 401;
+  route.get(
+    '/me',
+    extractTokenFromHeader,
+    validateToken,
+    async (ctx) => {
+      ctx.body = ctx.state.account;
       return;
     }
+  );
 
-    let token = authorization.slice(7);
-
-    try {
-      let payload = jwt.decode(token, TokenKey);
-      let { id: userId } = payload;
-      let { id, username } = await User.get(userId);
-      ctx.body = {
-        id,
-        username,
-      };
-      return;
-    } catch (e) {
-      ctx.status = 401;
-      if (e instanceof jwt.JsonWebTokenError) {
-        ctx.body = {
-          message: 'Invalid token',
-        };
-        return;
-      }
-
-      if (e instanceof jwt.TokenExpiredError) {
-        ctx.body = {
-          message: 'Token expired',
-        };
-        return;
-      }
-
-      ctx.body = e;
+  route.get(
+    '/refresh_token',
+    extractTokenFromQuery,
+    validateToken,
+    (ctx) => {
+      let { account } = ctx.state;
+      ctx.body = generateToken(account);
     }
-  });
+  );
 };

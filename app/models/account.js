@@ -1,8 +1,8 @@
 import r from '../lib/rethink.js';
 import bcrypt from 'bcrypt-as-promised';
-export const TableName = 'users';
+export const TableName = 'accounts';
 
-export class User {
+export class Account {
   constructor(params) {
     if (params && typeof params === 'object') {
       Object.assign(this, params);
@@ -65,7 +65,7 @@ export class User {
       .run();
 
     if (result && result.length === 1) {
-      return new User(result[0]);
+      return new Account(result[0]);
     }
 
     return undefined;
@@ -118,7 +118,7 @@ export class User {
       .get(id)
       .run();
     if (result) {
-      return new User(result);
+      return new Account(result);
     }
 
     return undefined;
@@ -131,7 +131,7 @@ export class User {
       .run();
 
     if (result) {
-      return result.map(item => new User({
+      return result.map(item => new Account({
         username: item.username,
         id: item.id,
       }));
