@@ -1,7 +1,7 @@
 import 'babel-polyfill';
 import request from 'supertest';
 import app from '../../app';
-import { User } from '../../app/models/user.js';
+import { Account } from '../../app/models/account.js';
 import { expect } from 'chai';
 
 let server = app.listen();
@@ -16,13 +16,13 @@ describe('Api authenticaion', () => {
   let password = 'secret';
 
   before(async () => {
-    let user = new User({ username, password });
+    let user = new Account({ username, password });
     await user.save();
     userId = user.id;
   });
 
   after(async () => {
-    await User.remove(userId);
+    await Account.remove(userId);
   });
 
   describe('Generate access token', () => {
@@ -60,7 +60,7 @@ describe('Api authenticaion', () => {
 
   describe('Using access token', () => {
     let token;
-    let returnUserId;
+    let returnAccountId;
 
     before(async () => {
       await request.agent(server)
@@ -74,7 +74,7 @@ describe('Api authenticaion', () => {
         .expect(({ body }) => {
           expect(body.access_token).to.exist;
           token = body.access_token;
-          returnUserId = body.id;
+          returnAccountId = body.id;
         });
     });
 
@@ -86,8 +86,27 @@ describe('Api authenticaion', () => {
         .expect(200)
         .expect(({ body }) => {
           expect(body.username).to.equal(username);
-          expect(body.id).to.equal(returnUserId);
+          expect(body.id).to.equal(returnAccountId);
         });
+    });
+
+    it('should not verify malformed access token', async () => {
+      await request.agent(server)
+        .get('/me')
+        .set('Authorization', `Bearer adfa${token}asdf`)
+        .set('Content-Type', 'application/json')
+        .expect(401)
+        .expect(({ body }) => {
+          expect(body.message).to.equal('Invalid token');
+        });
+    });
+
+    it('should not verify malformed request header', async () => {
+      await request.agent(server)
+        .get('/me')
+        .set('Authorization', `aaaa ${token}asdf`)
+        .set('Content-Type', 'application/json')
+        .expect(401);
     });
 
     it('should refresh access token', async () => {
@@ -98,7 +117,7 @@ describe('Api authenticaion', () => {
         .expect(({ body }) => {
           expect(body.access_token).to.exist;
           expect(body.username).to.equal(username);
-          expect(body.id).to.equal(returnUserId);
+          expect(body.id).to.equal(returnAccountId);
         });
     });
   });
