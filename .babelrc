@@ -2,5 +2,19 @@
   "presets": [
     "es2015",
     "stage-3"
-  ]
+  ],
+  "env": {
+    "test": {
+      "plugins": [
+        [
+          "istanbul",
+          {
+            "exclude": [
+              "**/*.spec.js"
+            ]
+          }
+        ]
+      ]
+    }
+  }
 }
