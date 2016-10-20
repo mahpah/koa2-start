@@ -1,0 +1,22 @@
+{
+	"compilerOptions": {
+		"target": "ES2015",
+		"module": "commonjs",
+		"noEmitOnError": true,
+		"noImplicitAny": false,
+		"experimentalDecorators": true,
+		"sourceMap": true,
+		"sourceRoot": "src",
+		"strictNullChecks": true,
+		"types": [
+			"node",
+			"mocha"
+		],
+		"lib": [
+			"es2015"
+		]
+	},
+	"exclude": [
+		"node_modules"
+	]
+}

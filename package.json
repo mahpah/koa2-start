@@ -4,22 +4,48 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test:watch": "mocha --compilers js:babel-core/register --watch --recursive test",
-    "test:single": "mocha --compilers js:babel-core/register --recursive test",
-    "test": "NODE_ENV=test nyc --reporter=lcov --reporter=text npm run test:single",
-    "precoverage": "rm -Rf coverage",
+    "test:watch": "mocha --compilers js:ts-node/register --watch --recursive test",
+    "test:single": "mocha --compilers js:ts-node/register --recursive test/**/*.spec.ts",
+    "test": "NODE_ENV=test nyc npm run test:single",
     "start": "nodemon -e js,jade -x \"npm run serve\"",
-    "serve": "babel-node .",
-    "migrate": "babel-node migrations"
+    "serve": "ts-node .",
+    "migrate": "ts-node migrations"
   },
   "nyc": {
-    "sourceMap": false,
-    "instrument": false
+    "include": [
+      "app/**/*.ts"
+    ],
+    "exclude": [
+      "node_modules",
+      "dist",
+      "**/*.spec.ts",
+			"**/*.d.ts"
+    ],
+    "extension": [
+      ".ts"
+    ],
+    "require": [
+      "ts-node/register"
+    ],
+    "reporter": [
+      "text",
+      "lcov"
+    ],
+    "all": true
   },
   "keywords": [],
   "author": "Ha Pham <mahpahh@gmail.com> (http://mahpahh.com)",
   "license": "ISC",
   "devDependencies": {
+    "@types/chai": "^3.4.34",
+    "@types/jsonwebtoken": "^7.1.33",
+    "@types/koa": "^2.0.33",
+    "@types/koa-bodyparser": "^3.0.20",
+    "@types/koa-router": "^7.0.21",
+    "@types/mocha": "^2.2.32",
+    "@types/node": "^6.0.45",
+    "@types/node-uuid": "0.0.28",
+    "@types/supertest": "^1.1.31",
     "babel-cli": "^6.16.0",
     "babel-core": "^6.17.0",
     "babel-eslint": "^7.0.0",
@@ -31,7 +57,8 @@
     "mocha": "^3.1.2",
     "nodemon": "^1.11.0",
     "nyc": "^8.3.1",
-    "supertest": "^2.0.0"
+    "supertest": "^2.0.0",
+    "ts-node": "^1.6.0"
   },
   "dependencies": {
     "babel-polyfill": "^6.16.0",
