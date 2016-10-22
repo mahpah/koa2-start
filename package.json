@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test:watch": "mocha --compilers js:ts-node/register --watch --recursive test",
-    "test:single": "mocha --compilers js:ts-node/register --recursive test/**/*.spec.ts",
+    "test:watch": "mocha --compilers js:ts-node/register --watch --recursive **/*.spec.ts",
+    "test:single": "mocha --compilers js:ts-node/register --recursive **/*.spec.ts",
     "test": "NODE_ENV=test nyc npm run test:single",
     "start": "nodemon -e js,jade -x \"npm run serve\"",
     "serve": "ts-node .",

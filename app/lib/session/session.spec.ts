@@ -1,7 +1,7 @@
 import 'babel-polyfill'
 import * as request from 'supertest'
 import * as Koa from 'koa'
-import { session } from '../../app/lib/session'
+import { session } from './'
 
 const app = new Koa()
 

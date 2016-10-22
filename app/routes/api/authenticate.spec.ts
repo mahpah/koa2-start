@@ -1,7 +1,7 @@
 import 'babel-polyfill'
 import * as request from 'supertest'
-import app from '../../app'
-import { Account } from '../../app/models/account'
+import app from '../../'
+import { Account } from '../../models/account'
 import { expect } from 'chai'
 
 let server = app.listen(5000)

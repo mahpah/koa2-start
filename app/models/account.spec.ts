@@ -1,6 +1,6 @@
 import 'babel-polyfill'
 import { expect } from 'chai'
-import { Account, TableName } from '../../app/models/account'
+import { Account, TableName } from './account'
 import r from '../../app/lib/rethink'
 
 describe('Account model', () => {
