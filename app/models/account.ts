@@ -1,16 +1,16 @@
 import r from '../lib/rethink'
 import * as bcrypt from 'bcrypt-as-promised'
 export const TableName = 'accounts'
+import { rethinkModelFactory } from './rethink-model'
 
-export class Account {
-	id: string
+export class Account extends rethinkModelFactory(TableName) {
 	username: string
 	name: string
 	private _newPassword: boolean
 	private _password: string
 
 	static async findByUsername(username) {
-		let result = await r.table(TableName)
+		let result = await r.table(Account.tableName)
 			.filter({ username })
 			.run()
 
@@ -21,73 +21,7 @@ export class Account {
 		return undefined
 	}
 
-	static async remove(id) {
-		let result = await r.table(TableName)
-			.get(id)
-			.delete()
-			.run()
-		return result ? result.deleted === 1 : false
-	}
-
-	static async get(id) {
-		let result = await r.table(TableName)
-			.get(id)
-			.run()
-		if (result) {
-			return new Account(result)
-		}
-
-		return undefined
-	}
-
-	// TODO: ban this unsafe method
-	static async find(crit: Object) {
-		let result = await r.table(TableName)
-			.filter(crit)
-			.run()
-
-		if (result) {
-			return result.map(item => new Account({
-				username: item.username,
-				id: item.id,
-			}))
-		}
-
-		return undefined
-	}
-
-	constructor(params?: any) {
-		if (params && typeof params === 'object') {
-			Object.assign(this, params)
-		}
-	}
-
-	async save() {
-		await this._hashPassword()
-		let data = this._validate()
-		let result: any
-		if (!data) {
-			return undefined
-		}
-
-		if (this.id) {
-			result = await r.table(TableName)
-				.get(this.id)
-				.update(data)
-				.run()
-		} else {
-			result = await r.table(TableName)
-				.insert(data)
-				.run()
-			if (result && result.inserted === 1) {
-				this.id = result.generated_keys[0]
-			}
-		}
-
-		return result
-	}
-
-	_validate() {
+	static validate(input) {
 		const schema = {
 			username: 'string',
 			password: 'string',
@@ -98,18 +32,47 @@ export class Account {
 
 		Object.keys(schema).forEach(key => {
 			let type: any = schema[key]
-			if (!this[key] || typeof this[key] !== type) {
+			if (!input[key] || typeof input[key] !== type) {
 				isValid = false
 			} else {
-				sanitized[key] = this[key]
+				sanitized[key] = input[key]
 			}
 		})
 
 		if (isValid) {
-			return sanitized
+			return sanitized as Account
 		}
 
 		return undefined
+	}
+
+	constructor(params?: any) {
+		super(params)
+	}
+
+	async save() {
+		await this.hashPassword()
+		let data = Account.validate(this)
+		let result: any
+		if (!data) {
+			return undefined
+		}
+
+		if (this.id) {
+			result = await r.table(Account.tableName)
+				.get(this.id)
+				.update(data)
+				.run()
+		} else {
+			result = await r.table(Account.tableName)
+				.insert(data)
+				.run()
+			if (result && result.inserted === 1) {
+				this.id = result.generated_keys[0]
+			}
+		}
+
+		return result
 	}
 
 	/**
@@ -138,7 +101,7 @@ export class Account {
 		}
 	}
 
-	private async _hashPassword() {
+	private async hashPassword() {
 		if (this._newPassword) {
 			let salt = await bcrypt.genSalt(10)
 			this.password = await bcrypt.hash(this.password, salt)

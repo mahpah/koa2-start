@@ -39,7 +39,7 @@ const validateToken = async (ctx: Context, next) => {
 	try {
 		let payload = jwt.verify(token, TokenKey)
 		let { id: userId } = payload
-		let account = await Account.get(userId)
+		let account = await Account.get(userId) as Account
 
 		if (!account) {
 			ctx.body = {

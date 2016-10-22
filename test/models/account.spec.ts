@@ -111,8 +111,8 @@ describe('Account model', () => {
 		let user = new Account({ username, password })
 		await user.save()
 
-		let john = await Account.get(user.id)
-		expect(john instanceof Account).to.be.true
+		let john = await Account.get(user.id) as Account
+		expect(john).to.exist
 		if (john) {
 			expect(john.username).to.eql(user.username)
 		}
